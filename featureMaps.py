@@ -33,6 +33,18 @@ def average_hydrophobicity(sequence):
     return ave_hydrophobicity/(len(sequence)-non_counted)
 
 
+def average_side_chain_charge(sequence):
+    ave_charge = 0
+    non_counted = 0
+    for letter in sequence:
+        if (letter in SIDE_CHAIN_CHARGE):
+            ave_charge+= SIDE_CHAIN_CHARGE[letter]
+        else:
+            non_counted += 1.0
+
+    return ave_charge / (len(sequence) - non_counted)
+
+
 
 
 def dictionary_feature_extractor(record):
@@ -134,12 +146,12 @@ def global_feature_dict(record, bipeptide = False):
     #Start Features
     start_pattern = sequence[:50]
     simplified_start_pattern = simplified_sequence[:50]
-    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start",bipeptide)
+    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start",False,secondary_struct=False)
 
     #End Features
     end_pattern = sequence[-50:]
     simplified_end_pattern = simplified_sequence[:50]
-    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end",bipeptide)
+    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end",False,secondary_struct=False)
 
     return result
 
@@ -156,28 +168,40 @@ def global_and_sliding_window_feature_dict(record, window = 50, bipeptide = Fals
 
     result = feature_extractor(result,sequence, simplified_sequence,"global",bipeptide)
 
-    if(seq_length > window):
-        count = 0
+    # Start Features
+    start_pattern = sequence[:50]
+    simplified_start_pattern = simplified_sequence[:50]
+    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start", bipeptide=False, secondary_struct=False)
 
-        while(count+window < seq_length):
+    # End Features
+    end_pattern = sequence[-50:]
+    simplified_end_pattern = simplified_sequence[:50]
+    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end", bipeptide=False,secondary_struct=False)
+
+
+    if(seq_length > window):
+        count = 50
+
+        while(count+window < seq_length-50):
             segment = sequence[count:count+window]
             simplified_segment = re.sub('[XU]', '', segment)
             simplified_segment= re.sub('[B]', 'D', simplified_segment)
-            result = feature_extractor(result,segment,simplified_segment,count,bipeptide)
+            result = feature_extractor(result,segment,simplified_segment,count,bipeptide=False,secondary_struct=False,side_charge = False,peptide=False)
             count += window
 
         segment = sequence[count:]
         simplified_segment = re.sub('[XU]', '', segment)
         simplified_segment = re.sub('[B]', 'D', simplified_segment)
-        result = feature_extractor(result, segment, simplified_segment, count,bipeptide)
+        result = feature_extractor(result, segment, simplified_segment, count,bipeptide=False,secondary_struct=False,side_charge = False,peptide=False)
 
     return result
 
 
-def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide):
+def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide=False, secondary_struct=True, side_charge = True,peptide=True):
 
-    for acid in AMINO_ACIDS:
-        result["{}_composition_{}".format(acid,suffix)] = aminoacid_composition(sequence, acid)
+    if(peptide):
+        for acid in AMINO_ACIDS:
+            result["{}_composition_{}".format(acid,suffix)] = aminoacid_composition(sequence, acid)
 
     if(bipeptide):
         for acid1 in AMINO_ACIDS:
@@ -185,14 +209,18 @@ def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide):
                 result["{}{}_composition_{}".format(acid1,acid2,suffix)]=aminoacid_composition(sequence,acid1+acid2)
 
     result["hydrophobicity_{}".format(suffix)] = average_hydrophobicity(sequence)
+    if(side_charge):
+        result["side_chain_charge_{}".format(suffix)] = average_side_chain_charge(sequence)
 
     tools = ProteinAnalysis(sequence)
     tools_simplified_sequence = ProteinAnalysis(simplified_sequence)
 
-    helix, turn, sheet = tools.secondary_structure_fraction()
-    result["helix_{}".format(suffix)] = helix
-    result["turn_{}".format(suffix)] = turn
-    result["sheet_{}".format(suffix)] = sheet
+    if(secondary_struct):
+        helix, turn, sheet = tools.secondary_structure_fraction()
+        result["helix_{}".format(suffix)] = helix
+        result["turn_{}".format(suffix)] = turn
+        result["sheet_{}".format(suffix)] = sheet
+
     result["aromaticity_{}".format(suffix)] = tools.aromaticity()
     result["isoelectric_point_{}".format(suffix)] = tools.isoelectric_point()
 

@@ -19,7 +19,7 @@ cross_val_obj.fit(x,y_true)
 
 end = time.time()
 
-with open("Saved_Data/RandomForcestCVResults.pickle",'wb') as f:
+with open("Saved_Data/RandomForestCVResults.pickle",'wb') as f:
     pickle.dump(cross_val_obj,f)
 
 
