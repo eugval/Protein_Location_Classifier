@@ -32,6 +32,19 @@ def average_hydrophobicity(sequence):
 
     return ave_hydrophobicity/(len(sequence)-non_counted)
 
+def total_hydrophobicity(sequence, type_of_h):
+    total_phob = 0
+    for letter in sequence:
+        if (type_of_h == "positive"):
+            if (letter in SIDE_CHAIN_CHARGE and SIDE_CHAIN_CHARGE[letter] > 0):
+                total_phob += SIDE_CHAIN_CHARGE[letter]
+
+        if (type_of_h == "negative"):
+            if (letter in SIDE_CHAIN_CHARGE and SIDE_CHAIN_CHARGE[letter] < 0):
+                total_phob += SIDE_CHAIN_CHARGE[letter]
+
+    return total_phob
+
 
 def average_side_chain_charge(sequence):
     ave_charge = 0
@@ -45,95 +58,21 @@ def average_side_chain_charge(sequence):
     return ave_charge / (len(sequence) - non_counted)
 
 
+def total_charge(sequence,type_of_charge):
+    total_charge = 0
+    for letter in sequence:
+        if(type_of_charge == "positive"):
+            if (letter in SIDE_CHAIN_CHARGE and SIDE_CHAIN_CHARGE[letter]>0):
+                total_charge += SIDE_CHAIN_CHARGE[letter]
+
+        if(type_of_charge == "negative"):
+            if (letter in SIDE_CHAIN_CHARGE and SIDE_CHAIN_CHARGE[letter]<0):
+                total_charge += SIDE_CHAIN_CHARGE[letter]
+
+    return total_charge
 
 
-def dictionary_feature_extractor(record):
-    result = defaultdict(float)
-    sequence = str(record.seq)
-    simplified_sequence = re.sub('[XU]', '', sequence)
-    simplified_sequence = re.sub('[B]', 'D', simplified_sequence)
-
-    #Global features
-    result["sequence_length"] = len(sequence)
-
-    for acid in AMINO_ACIDS:
-        result["global_{}_composition".format(acid)] = aminoacid_composition(sequence, acid)
-
-    result["global_hydrophobicity"] = average_hydrophobicity(sequence)
-
-    tools = ProteinAnalysis(sequence)
-    tools_simplified_sequence= ProteinAnalysis(simplified_sequence)
-    helix,turn,sheet = tools.secondary_structure_fraction()
-    result["helix"] = helix
-    result["turn"] =  turn
-    result["sheet"] = sheet
-
-    result["aromaticity"]=tools.aromaticity()
-    result["isoelectric_point"] = tools.isoelectric_point()
-    result["molecular_weight"] = tools_simplified_sequence.molecular_weight()
-    result["instability_index"]=tools_simplified_sequence.instability_index()
-    result["gravy"] = tools_simplified_sequence.gravy()
-    
-
-    #Start features
-    start_pattern = sequence[:50]
-    simplified_start_pattern = simplified_sequence[:50]
-
-
-    for acid in AMINO_ACIDS:
-        result["{}_composition_start".format(acid)] = aminoacid_composition(record.seq, acid, "start", 50)
-
-    tools = ProteinAnalysis(start_pattern)
-    tools_simplified_sequence = ProteinAnalysis(simplified_start_pattern)
-
-
-    result["start_hydrophobicity"] = average_hydrophobicity(start_pattern)
-    
-    result["aromaticity_start"] = tools.aromaticity()
-    result["isoelectric_point_start"] = tools.isoelectric_point()
-    helix, turn, sheet = tools.secondary_structure_fraction()
-    result["helix_start"] = helix
-    result["turn_start"] = turn
-    result["sheet_start"] = sheet
-
-    result["molecular_weight_start"] = tools_simplified_sequence.molecular_weight()
-    result["instability_index_start"] = tools_simplified_sequence.instability_index()
-    result["gravy_start"] = tools_simplified_sequence.gravy()
-    
-
-
-
-
-
-    #End Features
-    end_pattern = sequence[-50:]
-    simplified_end_pattern = simplified_sequence[:50]
-
-    tools = ProteinAnalysis(end_pattern)
-    tools_simplified_sequence = ProteinAnalysis(simplified_end_pattern)
-
-    for acid in AMINO_ACIDS:
-        result["{}_composition_end".format(acid)] = aminoacid_composition(record.seq, acid, "end", 50)
-
-    result["end_hydrophobicity"] = average_hydrophobicity(end_pattern)
-
-    result["isoelectric_point_end"] = tools.isoelectric_point()
-    result["aromaticity_end"] = tools.aromaticity()
-    helix, turn, sheet = tools.secondary_structure_fraction()
-    result["helix_end"] = helix
-    result["turn_end"] = turn
-    result["sheet_end"] = sheet
-    
-    result["molecular_weight_end"] = tools_simplified_sequence.molecular_weight()
-    result["instability_index_end"] = tools_simplified_sequence.instability_index()
-    result["gravy_end"] = tools_simplified_sequence.gravy()
-
-    return result
-
-
-
-
-def global_feature_dict(record, bipeptide = False):
+def global_feature_dict(record, amount_start = 50, amount_in_end=50, global_bipeptide = False, local_bipeptide=False, aromaticity = True,instability = True, average_h=True, side_charge_ave = True, gravy = True):
     result = defaultdict(float)
     sequence = str(record.seq)
     simplified_sequence = re.sub('[XU]', '', sequence)
@@ -141,23 +80,93 @@ def global_feature_dict(record, bipeptide = False):
 
     #Global Features
     result["sequence_length"] = len(sequence)
-    result = feature_extractor(result,sequence, simplified_sequence,"global",bipeptide)
+    result = feature_extractor(result,sequence, simplified_sequence,"global", bipeptide = global_bipeptide, aromaticity=aromaticity, instability = instability,average_h=average_h,side_charge_ave=side_charge_ave, gravy =gravy )
 
     #Start Features
-    start_pattern = sequence[:50]
-    simplified_start_pattern = simplified_sequence[:50]
-    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start",False,secondary_struct=False)
+    start_pattern = sequence[:amount_start]
+    simplified_start_pattern = simplified_sequence[:amount_start]
+    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start",bipeptide = local_bipeptide, secondary_struct=False, aromaticity=aromaticity, instability = instability,average_h=average_h,side_charge_ave=side_charge_ave, gravy =gravy)
 
     #End Features
-    end_pattern = sequence[-50:]
-    simplified_end_pattern = simplified_sequence[:50]
-    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end",False,secondary_struct=False)
+    end_pattern = sequence[-amount_in_end:]
+    simplified_end_pattern = simplified_sequence[-amount_in_end:]
+    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end",  bipeptide = local_bipeptide, secondary_struct=False, aromaticity=aromaticity, instability = instability,average_h=average_h,side_charge_ave=side_charge_ave, gravy =gravy)
 
     return result
 
 
 
-def global_and_sliding_window_feature_dict(record, window = 50, bipeptide = False):
+
+def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide=False, secondary_struct=True, side_charge = True,peptide=True, aromaticity = True, instability = True, average_h=True,side_charge_ave=True, gravy = True):
+
+    if(peptide):
+        for acid in AMINO_ACIDS:
+            result["{}_composition_{}".format(acid,suffix)] = aminoacid_composition(sequence, acid)
+
+    if(bipeptide):
+        for acid1 in AMINO_ACIDS:
+            for acid2 in AMINO_ACIDS:
+                result["{}{}_composition_{}".format(acid1,acid2,suffix)]=aminoacid_composition(sequence,acid1+acid2)
+
+    if(average_h):
+        result["hydrophobicity_{}".format(suffix)] = average_hydrophobicity(sequence)
+
+    result["total_positive_hydrophobicity_{}".format(suffix)] = total_hydrophobicity(sequence,"positive")
+    result["total_negative_hydrophobicity_{}".format(suffix)] = total_hydrophobicity(sequence,"negative")
+
+    if(side_charge):
+        if(side_charge_ave):
+            result["side_chain_charge_{}".format(suffix)] = average_side_chain_charge(sequence)
+        result["total_positive_charge_{}".format(suffix)] = total_charge(sequence,"positive")
+        result["total_negative_charge_{}".format(suffix)] = total_charge(sequence, "negative")
+
+    tools = ProteinAnalysis(sequence)
+    tools_simplified_sequence = ProteinAnalysis(simplified_sequence)
+
+    if(secondary_struct):
+        helix, turn, sheet = tools.secondary_structure_fraction()
+        result["helix_{}".format(suffix)] = helix
+        result["turn_{}".format(suffix)] = turn
+        result["sheet_{}".format(suffix)] = sheet
+
+    if(aromaticity):
+        result["aromaticity_{}".format(suffix)] = tools.aromaticity()
+    result["isoelectric_point_{}".format(suffix)] = tools.isoelectric_point()
+
+    result["molecular_weight_{}".format(suffix)] = tools_simplified_sequence.molecular_weight()
+
+    if(instability):
+        result["instability_index_{}".format(suffix)] = tools_simplified_sequence.instability_index()
+
+    if(gravy):
+        result["gravy_{}".format(suffix)] = tools_simplified_sequence.gravy()
+
+    return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def global_and_sliding_window_feature_dict(record= None, window = 50, bipeptide = False, aromaticity = True,instability = True ):
+    if(record==None):
+        raise AttributeError("record needs to be provided")
+
     result = defaultdict(float)
     sequence = str(record.seq)
     simplified_sequence = re.sub('[XU]', '', sequence)
@@ -166,17 +175,17 @@ def global_and_sliding_window_feature_dict(record, window = 50, bipeptide = Fals
     seq_length =len(sequence)
     result["sequence_length"] = seq_length
 
-    result = feature_extractor(result,sequence, simplified_sequence,"global",bipeptide)
+    result = feature_extractor(result,sequence, simplified_sequence,"global",bipeptide, instability = instability, aromaticity = aromaticity)
 
     # Start Features
     start_pattern = sequence[:50]
     simplified_start_pattern = simplified_sequence[:50]
-    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start", bipeptide=False, secondary_struct=False)
+    result = feature_extractor(result, start_pattern, simplified_start_pattern, "start", bipeptide=False, secondary_struct=False, instability = instability, aromaticity = aromaticity)
 
     # End Features
     end_pattern = sequence[-50:]
     simplified_end_pattern = simplified_sequence[:50]
-    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end", bipeptide=False,secondary_struct=False)
+    result = feature_extractor(result, end_pattern, simplified_end_pattern, "end", bipeptide=False,secondary_struct=False, instability = instability, aromaticity = aromaticity)
 
 
     if(seq_length > window):
@@ -195,41 +204,6 @@ def global_and_sliding_window_feature_dict(record, window = 50, bipeptide = Fals
         result = feature_extractor(result, segment, simplified_segment, count,bipeptide=False,secondary_struct=False,side_charge = False,peptide=False)
 
     return result
-
-
-def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide=False, secondary_struct=True, side_charge = True,peptide=True):
-
-    if(peptide):
-        for acid in AMINO_ACIDS:
-            result["{}_composition_{}".format(acid,suffix)] = aminoacid_composition(sequence, acid)
-
-    if(bipeptide):
-        for acid1 in AMINO_ACIDS:
-            for acid2 in AMINO_ACIDS:
-                result["{}{}_composition_{}".format(acid1,acid2,suffix)]=aminoacid_composition(sequence,acid1+acid2)
-
-    result["hydrophobicity_{}".format(suffix)] = average_hydrophobicity(sequence)
-    if(side_charge):
-        result["side_chain_charge_{}".format(suffix)] = average_side_chain_charge(sequence)
-
-    tools = ProteinAnalysis(sequence)
-    tools_simplified_sequence = ProteinAnalysis(simplified_sequence)
-
-    if(secondary_struct):
-        helix, turn, sheet = tools.secondary_structure_fraction()
-        result["helix_{}".format(suffix)] = helix
-        result["turn_{}".format(suffix)] = turn
-        result["sheet_{}".format(suffix)] = sheet
-
-    result["aromaticity_{}".format(suffix)] = tools.aromaticity()
-    result["isoelectric_point_{}".format(suffix)] = tools.isoelectric_point()
-
-    result["molecular_weight_{}".format(suffix)] = tools_simplified_sequence.molecular_weight()
-    result["instability_index_{}".format(suffix)] = tools_simplified_sequence.instability_index()
-    result["gravy_{}".format(suffix)] = tools_simplified_sequence.gravy()
-
-    return result
-
 
 
 

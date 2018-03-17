@@ -1,3 +1,20 @@
+CLASSES = ["Cytosolic", "Mitochondrial", "Nucleic", "Secreted"]
+
+CLASS_INDICES ={"cyto":0,"mito":1,"nuc":2,"secr":3}
+
+data_folder =  "Saved_Data/Features/"
+models_folder = "Saved_Data/ModelOutputs/"
+error_folder = "Saved_Data/ErrorAnalysis/"
+
+LRCV ="LRCV"
+RFCV = "RFCV"
+GBCV = "GBCV"
+SVMCV ="SVMCV"
+ensembler = "Ensembler"
+ensemblerCV = "ensembleClassifierCV"
+
+model_types = [LRCV,RFCV,GBCV,SVMCV]
+
 AMINO_ACIDS = ["A",
                "P",
                "B",
@@ -34,7 +51,7 @@ SIDE_CHAIN_CHARGE = {"A":0,
                "S":0,
                "E":-1.0,
                "T":0,
-               "F":0,gi
+               "F":0,
                "U":0,
                "G":0,
                "V":0,
