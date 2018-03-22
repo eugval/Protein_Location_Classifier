@@ -1,4 +1,3 @@
-from Bio import SeqIO
 import pickle
 from featureMaps import global_feature_dict
 from sklearn.feature_extraction import DictVectorizer
@@ -15,13 +14,11 @@ from globals import data_folder
 
 def tune_features(x_raw_train, y_train,extension):
 
-    #"local_bipeptide":[False,True],
-    features_dict ={"amount_start":[5,10,15,20,30,40,50,60,70],"amount_in_end":[5,10,15,20,30,40,50,60,70],"aromaticity":[True,False],"instability":[True,False],"side_charge_ave": [True,False],"average_h":[True,False]}  #
+    #features_dict ={"amount_start":[5,10,15,20,30,40,50,60,70],"amount_in_end":[5,10,15,20,30,40,50,60,70],"aromaticity":[True,False],"instability":[True,False],"side_charge_ave": [True,False],"average_h":[True,False]}
+    #best_features_dict ={"amount_start":[0,0],"amount_in_end":[0,0],"aromaticity":[0,0],"instability":[0,0],"average_h":[0,0],"side_charge_ave": [0,0]}
 
-    #features_dict = {"amount_start":[5]}
-
-    #"local_bipeptide":[0,0],
-    best_features_dict ={"amount_start":[0,0],"amount_in_end":[0,0],"aromaticity":[0,0],"instability":[0,0],"average_h":[0,0],"side_charge_ave": [0,0]}
+    features_dict ={"amount_start":[5,10,15,20,30,40,50,60,70],"amount_in_end":[5,10,15,20,30,40,50,60,70]}
+    best_features_dict ={"amount_start":[0,0],"amount_in_end":[0,0]}
 
 
     x_raw_train, x_raw_val, y_train, y_val = train_test_split(x_raw_train, y_train, test_size=0.1)
