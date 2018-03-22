@@ -15,11 +15,12 @@ save_suffix= "_tunned_features"
 regressor_str = "Ensembler"
 extension = ".pickle"
 
-CV = False
-Curves = False
-Hists = False
-FeatureRankGB = False
-FeatureRankRF = False
+#Flags controlling which parts of the module to run
+CV = True
+Curves = True
+Hists = True
+FeatureRankGB = True
+FeatureRankRF = True
 
 
 x_train, y_train, x_test, y_test = load_data(data_folder,save_suffix,extension)
@@ -83,10 +84,6 @@ if(CV):
     cv_std_f1_macro= np.std(arr_f1_macro)
     print("f1_macro :{} std: {}".format(cv_f1_macro,cv_std_f1_macro))
     print(arr_f1_macro)
-    #cv_f1_micro = np.mean(arr_f1_micro)
-    #cv_std_f1_micro= np.std(arr_f1_micro)
-    #print("f1_micro :{} std: {}".format(cv_f1_micro,cv_std_f1_micro))
-    #print(arr_f1_micro)
     cv_prec_macro = np.mean(arr_precision_macro)
     cv_std_prec_macro= np.std(arr_precision_macro)
     print("precision macro :{} std: {}".format(cv_prec_macro,cv_std_prec_macro))
@@ -165,13 +162,10 @@ if(FeatureRankRF):
     plot_feature_importances(RF,vectorizer,disp_feat, RF= True)
 
 
-#make_characterisation_histograms(x_test_dicts,"sequence_length",y_pred,y_test,"sequence length")
 make_characterisation_histograms(x_test_dicts,"hydrophobicity_start",y_pred,y_test, "average hydrophobicity at the start of the sequence")
 make_characterisation_histograms(x_test_dicts,"helix_global",y_pred,y_test, "overall proportion of aminoacids prone to form an alpha-helix")
 make_characterisation_histograms(x_test_dicts,"sheet_global",y_pred,y_test, "overall proportion of aminoacids prone to form a beta-sheet")
 make_characterisation_histograms(x_test_dicts,"isoelectric_point_global",y_pred,y_test, "average isoelectric point")
-#make_characterisation_histograms(x_test_dicts,"molecular_weight_global",y_pred,y_test, "molecular weight")
-#make_characterisation_histograms(x_test_dicts,"side_chain_charge_global",y_pred,y_test, "average side chain charge")
 plt.show()
 
 print("finish")

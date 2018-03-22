@@ -15,8 +15,8 @@ test_size = 0.1
 x_raw_train, x_raw_test, y_train, y_test  = data_split(test_size)
 
 print("Tunning features....")
-#feat_params = tune_features(x_raw_train,y_train, extension)
-feat_params = pickle.load(open("Saved_Data/Features/Best_features.pickle",'rb'))
+feat_params = tune_features(x_raw_train,y_train, extension)
+#feat_params = pickle.load(open("Saved_Data/Features/Best_features.pickle",'rb'))
 
 print(feat_params)
 
