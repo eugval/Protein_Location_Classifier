@@ -32,6 +32,7 @@ def data_split(test_size):
     x_raw = cyto+mito+nuc+secr
     y_true = cyto_labels+mito_labels+nuc_labels+secr_labels
 
+
     x_raw_train, x_raw_test, y_train, y_test= train_test_split(x_raw, y_true, test_size=test_size)
     return x_raw_train, x_raw_test,y_train,y_test
 

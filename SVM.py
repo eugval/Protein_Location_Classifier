@@ -35,7 +35,7 @@ def SVMCV(models_folder,data_folder,save_suffix,extension, cv = 3):
 
 
 if(__name__=="__main__"):
-    save_suffix = "_mid_complexity"
+    save_suffix = "_tunned_features"
     extension = ".pickle"
     SVMCV(models_folder, data_folder, save_suffix, extension)
 

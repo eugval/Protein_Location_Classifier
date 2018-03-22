@@ -24,8 +24,8 @@ def plot_roc_curves(y_proba, y_test_binary):
         roc_auc[i] = auc(fpr[i], tpr[i])
 
 
-    fpr["micro"], tpr["micro"], _ = roc_curve(y_test_binary.ravel(), np.array(y_proba).ravel())
-    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+    #fpr["micro"], tpr["micro"], _ = roc_curve(y_test_binary.ravel(), np.array(y_proba).ravel())
+   # roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
 
 
@@ -49,10 +49,10 @@ def plot_roc_curves(y_proba, y_test_binary):
 
     # Plot all ROC curves
 
-    plt.plot(fpr["micro"], tpr["micro"],
-             label='micro-average ROC curve (area = {0:0.2f})'
-                   ''.format(roc_auc["micro"]),
-             color='deeppink', linestyle=':', linewidth=4)
+    #plt.plot(fpr["micro"], tpr["micro"],
+    #         label='micro-average ROC curve (area = {0:0.2f})'
+      #             ''.format(roc_auc["micro"]),
+     #        color='deeppink', linestyle=':', linewidth=4)
 
     plt.plot(fpr["macro"], tpr["macro"],
              label='macro-average ROC curve (area = {0:0.2f})'
@@ -136,13 +136,13 @@ def make_characterisation_histograms(x_test_dicts, feature,y_pred,y_test, title_
 
     if(ratio):
         hist_all,bins = np.histogram(examples_hist, bins = 10)
-        hist_missclassified, bins= np.histogram(missclassifed_examples_hist, range = (min(examples_hist), max(examples_hist)), bins = 10)
+        hist_missclassified, bins= np.histogram(missclassifed_examples_hist, range = (min(examples_hist), max(examples_hist)), bins = bins)
 
         hist_all[hist_all==0]=1
         final_hist = np.divide(hist_missclassified.astype(float), hist_all)
 
         plt.figure()
-        plt.bar(bins[:-1], final_hist,width = max(bins)/(len(bins)-1))
+        plt.bar(bins[:-1], final_hist, width=(max(bins)-min(bins))/len(bins))
         plt.xlim(min(bins), max(bins))
         plt.title("Histogram of the proportion of missclassified proteins per {}".format(title_feature))
         plt.ylabel("Proportion of missclassified proteins")
@@ -151,16 +151,60 @@ def make_characterisation_histograms(x_test_dicts, feature,y_pred,y_test, title_
     else:
         plt.figure()
         plt.hist(missclassifed_examples_hist)
-        plt.title("Histogram of the number of missclassified proteins as a function of ".format(title_feature))
+        plt.title("Histogram of the number of missclassified proteins as a function of {} ".format(title_feature))
         plt.ylabel("Number of missclassified proteins")
         plt.xlabel("{} values".format(title_feature))
 
         plt.figure()
         plt.hist(examples_hist)
-        plt.title("Histogram of the number of proteins as a function of ".format(title_feature))
+        plt.title("Histogram of the number of proteins as a function of {}p".format(title_feature))
         plt.ylabel("Number of  proteins")
         plt.xlabel("{} values".format(title_feature))
 
+
+
+def plot_feature_importances(classifier, vectorizer,disp_feat, title,proclass = False, RF = False):
+    if(not proclass):
+        importances = classifier.feature_importances_
+    else:
+        importances = np.mean([tree.feature_importances_ for tree in classifier.estimators_[:,proclass]],
+                                       axis=0)
+
+
+    '''
+    if(not RF):
+        stds = np.zeros((4, importances.size))
+        for class_label in range(4):
+                stds[class_label] = np.std([tree.feature_importances_ for tree in classifier.estimators_[:,class_label]],
+                                           axis=0)
+        if(not proclass):
+            std = np.mean(stds, axis=0)
+        else:
+            std = stds[proclass]
+
+    else:
+        std= np.std([tree.feature_importances_ for tree in classifier.estimators_],
+                               axis=0)
+    '''
+
+
+
+    indices = np.argsort(importances)[::-1]
+
+    # Print the feature ranking
+    print("Feature ranking:")
+
+    for f in range(disp_feat):
+        print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+
+    # Plot the feature importances of the forest
+    plt.figure()
+    plt.title(title)
+    plt.bar(range(disp_feat), importances[indices[:disp_feat]],
+            color="b",  align="center") #yerr=std[indices[:disp_feat]],
+    plt.xticks(range(disp_feat), [vectorizer.feature_names_[index] for index in indices[:disp_feat]], rotation=-45)
+    plt.xlim([-1, disp_feat])
+    plt.show()
 
 
 

@@ -13,7 +13,7 @@ def GBCV(models_folder,data_folder,save_suffix,extension, cv=3):
     print(x.shape)
 
 
-    hyperparams = {'learning_rate': [0.0001,0.001,0.1], 'n_estimators':[100,150,200], 'subsample':[0.6,0.8,1.0],'max_depth':[2,3,4]}
+    hyperparams = {'learning_rate': [0.05,0.1,0.2], 'n_estimators':[50, 75, 100,150], 'subsample':[0.4, 0.5,0.6,0.8,1.0],'max_depth':[2,3,4]}
     #hyperparams = {'learning_rate': np.logspace(0.0001,1,8), 'n_estimators': np.linspace(50,200,8), 'subsample':[0.6,0.7,0.8,0.9,1.0],'max_depth':[2,3,4,5]}
     #hyperparams = {'learning_rate':[0.001,0.01], 'n_estimators': [100,150], 'subsample':[0.8]}
 

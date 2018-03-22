@@ -1,5 +1,5 @@
 CLASSES = ["Cytosolic", "Mitochondrial", "Nucleic", "Secreted"]
-
+CLASSES_S = ["Cyto", "Mito", "Nuc", "Secr"]
 CLASS_INDICES ={"cyto":0,"mito":1,"nuc":2,"secr":3}
 
 data_folder =  "Saved_Data/Features/"
@@ -55,7 +55,7 @@ SIDE_CHAIN_CHARGE = {"A":0,
                "U":0,
                "G":0,
                "V":0,
-               "H":0.9,
+               "H":-0.9,
                "W":0,
                "I":0,
                "Y":0,

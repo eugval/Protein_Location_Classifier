@@ -72,7 +72,7 @@ def total_charge(sequence,type_of_charge):
     return total_charge
 
 
-def global_feature_dict(record, amount_start = 50, amount_in_end=50, global_bipeptide = False, local_bipeptide=False, aromaticity = True,instability = True, average_h=True, side_charge_ave = True, gravy = True):
+def global_feature_dict(record, amount_start = 50, amount_in_end=50, global_bipeptide = True, local_bipeptide=False, aromaticity = True,instability = True, average_h =  True, side_charge_ave = True, gravy = False):
     result = defaultdict(float)
     sequence = str(record.seq)
     simplified_sequence = re.sub('[XU]', '', sequence)
@@ -97,7 +97,7 @@ def global_feature_dict(record, amount_start = 50, amount_in_end=50, global_bipe
 
 
 
-def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide=False, secondary_struct=True, side_charge = True,peptide=True, aromaticity = True, instability = True, average_h=True,side_charge_ave=True, gravy = True):
+def feature_extractor(result, sequence,simplified_sequence, suffix, bipeptide=False, secondary_struct=True, side_charge = True,peptide=True, aromaticity = True, instability = True, average_h=True,side_charge_ave=True, gravy = False):
 
     if(peptide):
         for acid in AMINO_ACIDS:

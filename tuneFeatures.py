@@ -13,15 +13,15 @@ from globals import data_folder
 
 
 
-def tune_features(x_raw_train, x_raw_test, y_train, y_test):
+def tune_features(x_raw_train, y_train,extension):
 
-
-    features_dict ={"amount_start":[5,10,15,20,30,40,50,60,70],"amount_in_end":[5,10,15,20,30,40,50,60,70], "global_bipeptide":[True,False],"local_bipeptide":[False,True],"aromaticity":[True,False],"instability":[True,False], "average_h":[True,False],"side_charge_ave": [True,False], "gravy": [True,False]}
+    #"local_bipeptide":[False,True],
+    features_dict ={"amount_start":[5,10,15,20,30,40,50,60,70],"amount_in_end":[5,10,15,20,30,40,50,60,70],"aromaticity":[True,False],"instability":[True,False],"side_charge_ave": [True,False],"average_h":[True,False]}  #
 
     #features_dict = {"amount_start":[5]}
 
-
-    best_features_dict ={"amount_start":[0,0],"amount_in_end":[0,0], "global_bipeptide":[0,0],"local_bipeptide":[0,0],"aromaticity":[0,0],"instability":[0,0],"average_h":[0,0],"side_charge_ave": [0,0], "gravy": [0,0]}
+    #"local_bipeptide":[0,0],
+    best_features_dict ={"amount_start":[0,0],"amount_in_end":[0,0],"aromaticity":[0,0],"instability":[0,0],"average_h":[0,0],"side_charge_ave": [0,0]}
 
 
     x_raw_train, x_raw_val, y_train, y_val = train_test_split(x_raw_train, y_train, test_size=0.1)
@@ -39,7 +39,7 @@ def tune_features(x_raw_train, x_raw_test, y_train, y_test):
             use = {feature:value}
 
             x_train = vectorizer.fit_transform([global_feature_dict(rec,**use) for rec in x_raw_train])
-            x_test = vectorizer.fit_transform([global_feature_dict(rec,**use) for rec in x_raw_test])
+            x_val = vectorizer.fit_transform([global_feature_dict(rec,**use) for rec in x_raw_val])
 
 
             print("Training classifier...")
@@ -53,7 +53,7 @@ def tune_features(x_raw_train, x_raw_test, y_train, y_test):
 
             classifier.fit(x_train, y_train)
 
-            score = classifier.score(x_test,y_test)
+            score = classifier.score(x_val,y_val)
 
             if(score>best_features_dict[feature][1]):
                 best_features_dict[feature][1]=score
@@ -77,7 +77,7 @@ if(__name__=="__main__"):
     extension = ".pickle"
     test_size = 0.1
     x_raw_train, x_raw_test, y_train, y_test = data_split(test_size)
-    tune_features(x_raw_train, x_raw_test, y_train, y_test)
+    tune_features(x_raw_train, y_train,extension)
 
 
 
