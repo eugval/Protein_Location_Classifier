@@ -125,6 +125,9 @@ def plot_confusion_matrix(cm, classes,
 
 
 
+
+
+
 def make_characterisation_histograms(x_test_dicts, feature,y_pred,y_test, title_feature, ratio = True):
     missclassifed_examples_hist = []
     examples_hist = []
@@ -162,6 +165,12 @@ def make_characterisation_histograms(x_test_dicts, feature,y_pred,y_test, title_
         plt.xlabel("{} values".format(title_feature))
 
 
+
+
+'''
+This function is taken from Scikit-learns implementation from :
+http://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html
+'''
 
 def plot_feature_importances(classifier, vectorizer,disp_feat, title,proclass = False, RF = False):
     if(not proclass):

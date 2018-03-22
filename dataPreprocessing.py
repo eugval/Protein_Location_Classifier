@@ -52,10 +52,6 @@ def dataPreprocessing(x_raw_train, x_raw_test,y_train, y_test,save_suffix,data_f
 
 
 
-
-
-
-
     if(save):
         with open("{}Train_Examples{}{}".format(data_folder,save_suffix,extension),'wb') as f:
             pickle.dump(x_train,f)
